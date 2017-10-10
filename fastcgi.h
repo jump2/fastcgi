@@ -1,7 +1,6 @@
 #ifndef __FASTCGI_H__
 #define __FASTCGI_H__
 
-#define SERVER_PORT             9000  
 #define FCGI_VERSION            1
 #define CONTENT_HEADER_LENGTH   8 
 

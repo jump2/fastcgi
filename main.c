@@ -6,12 +6,15 @@
 #include <netinet/in.h>
 #include <unistd.h>  
 #include <arpa/inet.h>
+#include <string.h>
 #include "fastcgi.h"
-
-#define SERVER_PORT 9000
+#include "config.h"
 
 int main(int argc, char **argv)
 {
+    syConfig conf;
+    memset(&conf,0, sizeof(syConfig));
+    init_config(&conf, "wow.conf");
     unsigned short requestId = 1;
     fcgi_container f;
     f.size = 0;
@@ -35,9 +38,9 @@ int main(int argc, char **argv)
     fc_params_end(f_container, requestId);
     fc_stdin(f_container, requestId, stdinContent);
     fc_stdin(f_container, requestId, "");
-    for(int i=0;i<f_container->size;i++) {
-        printf("%x ", *(f_container->content + i));
-    }
+    // for(int i=0;i<f_container->size;i++) {
+    //     printf("%x ", *(f_container->content + i));
+    // }
     printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
     int clientSocket;
@@ -51,10 +54,10 @@ int main(int argc, char **argv)
     }
 
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
+    serverAddr.sin_port = htons(conf.fastcgiPort);
     //指定服务器端的ip，本地测试：127.0.0.1  
     //inet_addr()函数，将点分十进制IP转换成网络字节序IP  
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serverAddr.sin_addr.s_addr = inet_addr(conf.fastcgiIp);
     if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
        perror("connect");
