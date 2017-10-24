@@ -127,10 +127,10 @@ void fc_stdin(fcgi_container *fc, u_short requestId, u_char *content)
 
 char *parse_fc_response(char response[], size_t length)
 {
-    char *html = '\0', *p;
+    char *html, *p;
     if(response[1] == FCGI_STDOUT) {
         size_t contentLength = (u_char)response[4]<<8 | (u_char)response[5];
-        html = realloc(html, contentLength + 1);
+        html = malloc(contentLength + 1);
         p = html;
         for(int i = 8; i < 8 + contentLength; i++) {
             *(p++) = response[i];

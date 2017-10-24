@@ -13,8 +13,8 @@ typedef struct _fcgi_container {
 } fcgi_container;
 
 typedef struct _fcgi_name_value_pair {
-    unsigned char *name;
-    unsigned char *value;
+    unsigned char name[255];
+    unsigned char value[255];
 } fcgi_name_value_pair;
 
 typedef enum _fcgi_request_type {
