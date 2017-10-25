@@ -127,16 +127,37 @@ void fc_stdin(fcgi_container *fc, u_short requestId, u_char *content)
 
 char *parse_fc_response(char response[], size_t length)
 {
-    char *html, *p;
-    if(response[1] == FCGI_STDOUT) {
-        size_t contentLength = (u_char)response[4]<<8 | (u_char)response[5];
-        html = malloc(contentLength + 1);
-        p = html;
-        for(int i = 8; i < 8 + contentLength; i++) {
-            *(p++) = response[i];
+    char *html = NULL, *p;
+    int index = 0;
+    size_t oldLength, contentLength;
+    do {
+        index++;
+        if(response[index] == FCGI_STDOUT) {
+            index += 3;
+            contentLength = (u_char)response[index++]<<8 | (u_char)response[index++];
+            if(!html) {
+                html = (char *)malloc(contentLength + 1);
+                p = html;
+                memset(p, 0, contentLength + 1);
+            } else if(contentLength > 0) {
+                oldLength = strlen(html);
+                html = (char *)realloc(html, contentLength + oldLength + 1);
+                p = html + oldLength;
+                memset(p, 0, contentLength + 1);
+            }
+            index += 2;
+            for(int i = index; i < index + contentLength; i++) {
+                *(p++) = response[i];
+            }
+            index += contentLength;
+        } else if(response[index] == FCGI_STDERR) {
+            index += 3;
+            contentLength = (u_char)response[index++]<<8 | (u_char)response[index++];
+            index += contentLength + 2;
+        } else if(response[index] == FCGI_END_REQUEST) {
+            break;
         }
-        p = '\0';
-        return html;
-    }
-    return '\0';
+    } while(index < length);
+
+    return html;
 }
